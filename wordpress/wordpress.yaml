@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: wordpress
+  labels:
+    name: wordpress
+spec:
+  containers:
+    # documentation for this image: https://hub.docker.com/_/wordpress/
+    - image: wordpress
+      name: wordpress
+      env:
+        - name: WORDPRESS_DB_PASSWORD
+          # Change this - must match mysql.yaml password.
+          value: popotitos42
+      ports:
+        - containerPort: 80
+          name: wordpress
+      volumeMounts:
+          # Name must match the volume name below.
+        - name: wordpress-persistent-storage
+          # Mount path within the container.
+          mountPath: /var/www/html
+  volumes:
+    - name: wordpress-persistent-storage
+      gcePersistentDisk:
+        # This GCE persistent disk must already exist.
+        pdName: wordpress-disk
+        fsType: ext4

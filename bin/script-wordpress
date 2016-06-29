@@ -1,0 +1,61 @@
+
+# Mostrar Application Launcher
+
+# Create cluster 
+gcloud container clusters create wppd --num-nodes 2
+
+gcloud compute instances list
+gcloud container clusters list
+
+# Create two persistent disks
+gcloud compute disks create --size 200GB mysql-disk
+gcloud compute disks create --size 200GB wordpress-disk
+
+# Create the MySQL pod and wait for it to appear
+kubectl create -f mysql.yaml
+kubectl get pod mysql
+
+# Create the MyQL service and wait for it
+kubectl create -f mysql-service.yaml
+kubectl get service mysql
+
+# Create the Wordpress pod
+kubectl create -f wordpress.yaml
+kubectl get pod wordpress
+
+# Create the service. Note the type: LoadBalancer setting, 
+# which will create an external load balancer
+kubectl create -f wordpress-service.yaml
+kubectl get service wpfrontend
+
+# Esperar a que aparezca la IP pública del servidor y conectar con el navegador (puerto 80)
+
+# Ver logs
+kubectl logs -f wordpress
+
+# Probar más adelante
+# kubectl attach wordpress -i
+
+# redirigir puerto a la máquina local y probar
+kubectl get pods
+kubectl port-forward <wordpress-pod-id> 80
+
+# No podemos reescalar en este ejemplo, porque hay volúmenes montados. 
+# Por eso usamos pods en lugar de ReplicationController
+
+# Ir a doc de vitess, buscar kubernetes en el indice
+
+# Delete and re-create pods
+kubectl delete -f wordpress.yaml
+kubectl delete -f mysql.yaml
+kubectl create -f wordpress.yaml
+kubectl create -f mysql.yaml
+
+# Cleanup
+gcloud compute firewall-rules delete wppd-world-80
+kubectl delete service wpfrontend
+kubectl delete service mysql
+kubectl delete pod wordpress
+kubectl delete pod mysql
+gcloud container clusters delete wppd
+gcloud compute disks delete mysql-disk wordpress-disk
