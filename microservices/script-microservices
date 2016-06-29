@@ -1,0 +1,19 @@
+#!/bin/bash
+# This full codelab is available at
+# https://codelabs.developers.google.com/codelabs/cloud-orchestrate-with-kubernetes/index.html
+
+# Show the Application Launcher, as an example of what we are doing now
+
+# Create cluster 
+gcloud container clusters create icoloma-microservices --num-nodes 2
+
+gcloud compute instances list
+gcloud container clusters list
+
+
+K8S Slides, steal from NEXT
+Compile VM
+Deploy VM
+Scale VM
+New deployment
+Kubernetes UI

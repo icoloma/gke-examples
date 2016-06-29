@@ -1,6 +1,0 @@
-kubectl get pods
-kubectl describe pods <pod_id>
-gcloud compute ssh <instance-id>
-sudo docker ps
-sudo docker logs <id>
-sudo docker exec -it <id> bash

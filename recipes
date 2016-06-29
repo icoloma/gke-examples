@@ -1,0 +1,9 @@
+# Generic recpes to use through the demo
+
+# Is kubectl autocompletion in place?
+kubectl log $pod [tab][tab]
+
+# Launch bash in a pod
+kubectl exec -ti [podname] -- bash
+
+# TODO: open the kubernetes UI
