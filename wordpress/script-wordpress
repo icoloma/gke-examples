@@ -26,8 +26,8 @@ gcloud compute disks create --size 200GB mysql-disk
 #---------+---------+---------+---------+---------
 
 # Create the MySQL pod and wait for it to appear
+watch kubectl get pods
 kubectl create -f mysql.yaml
-kubectl get pod mysql
 
 # redirect mysql port to the local machine
 kubectl port-forward mysql 3306
@@ -37,7 +37,6 @@ CREATE TABLE foo (id INTEGER);
 SHOW TABLES
 
 # Create the MyQL service and wait for it
-watch kubectl get pods
 kubectl create -f mysql-service.yaml
 kubectl describe service mysql
 
@@ -51,7 +50,7 @@ kubectl get service wpfrontend
 
 # Wait for the public IP to appear and connect with browser (port 80)
 
-# See logs
+# See logs 
 kubectl logs <wordpress-pod-id>
 
 # Delete a pod and see it re-created
