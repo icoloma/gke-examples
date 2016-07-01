@@ -4,6 +4,10 @@
 kubectl log $pod [tab][tab]
 
 # Launch bash in a pod
-kubectl exec -ti [podname] -- bash
+kubectl exec -ti [podname] /bin/sh
 
 # TODO: open the kubernetes UI
+
+
+# Create a git submodule in a folder
+git submodule add <git_url>

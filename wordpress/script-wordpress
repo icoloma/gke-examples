@@ -1,8 +1,14 @@
+#!/bin/bash
+# This tutorial is available at 
+# https://cloud.google.com/container-engine/docs/tutorials/persistent-disk/
 
-# Mostrar Application Launcher
+# Show Application Launcher, as an example of how to create Wordpress using plain VMs
 
 # Create cluster 
-gcloud container clusters create wppd --num-nodes 2
+gcloud container clusters create icoloma-wppd --num-nodes 2
+
+# Alternatively, if the cluster already exists
+# gcloud container clusters get-credentials icoloma-wppd
 
 gcloud compute instances list
 gcloud container clusters list
@@ -17,9 +23,9 @@ kubectl get pod mysql
 
 # Create the MyQL service and wait for it
 kubectl create -f mysql-service.yaml
-kubectl get service mysql
+kubectl describe service mysql
 
-# Create the Wordpress pod
+# Create the Wordpress Deployment
 kubectl create -f wordpress.yaml
 kubectl get pod wordpress
 
