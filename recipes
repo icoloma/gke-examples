@@ -6,8 +6,17 @@ kubectl log $pod [tab][tab]
 # Launch bash in a pod
 kubectl exec -ti [podname] /bin/sh
 
-# TODO: open the kubernetes UI
+# --- Open the kubernetes UI 
 
+# This does not work
+kube proxy --port 8080
+google-chrome localhost:8080/ui
+
+# retrieve the master username and password
+gcloud container clusters describe <clustername> | egrep '((username)|(password))'
+
+# get the IP address for Kube-UI at master
+kubectl cluster-info | grep kubernetes-dashboard
 
 # Create a git submodule in a folder
 git submodule add <git_url>

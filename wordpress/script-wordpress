@@ -2,7 +2,12 @@
 # This tutorial is available at 
 # https://cloud.google.com/container-engine/docs/tutorials/persistent-disk/
 
-# Show Application Launcher, as an example of how to create Wordpress using plain VMs
+# Show Application Launcher, as an example of how to 
+# create Wordpress using plain VMs
+
+#---------+---------+---------+---------+---------
+# Create and connect to cluster
+#---------+---------+---------+---------+---------
 
 # Create cluster 
 gcloud container clusters create icoloma-wppd --num-nodes 2
@@ -13,55 +18,83 @@ gcloud container clusters create icoloma-wppd --num-nodes 2
 gcloud compute instances list
 gcloud container clusters list
 
-# Create two persistent disks
+# Create persistent disk
 gcloud compute disks create --size 200GB mysql-disk
-gcloud compute disks create --size 200GB wordpress-disk
+
+#---------+---------+---------+---------+---------
+# Configure pods and services
+#---------+---------+---------+---------+---------
 
 # Create the MySQL pod and wait for it to appear
 kubectl create -f mysql.yaml
 kubectl get pod mysql
 
+# redirect mysql port to the local machine
+kubectl port-forward mysql 3306
+mysql --host=localhost --user=root --protocol=tcp --password=popotitos42 wordpress
+SHOW TABLES
+CREATE TABLE foo (id INTEGER);
+SHOW TABLES
+
 # Create the MyQL service and wait for it
+watch kubectl get pods
 kubectl create -f mysql-service.yaml
 kubectl describe service mysql
 
 # Create the Wordpress Deployment
 kubectl create -f wordpress.yaml
-kubectl get pod wordpress
 
 # Create the service. Note the type: LoadBalancer setting, 
 # which will create an external load balancer
 kubectl create -f wordpress-service.yaml
 kubectl get service wpfrontend
 
-# Esperar a que aparezca la IP pública del servidor y conectar con el navegador (puerto 80)
+# Wait for the public IP to appear and connect with browser (port 80)
 
-# Ver logs
-kubectl logs -f wordpress
+# See logs
+kubectl logs <wordpress-pod-id>
 
-# Probar más adelante
-# kubectl attach wordpress -i
+# Delete a pod and see it re-created
+kubectl delete pod <pod-id>
 
-# redirigir puerto a la máquina local y probar
-kubectl get pods
-kubectl port-forward <wordpress-pod-id> 80
+#---------+---------+---------+---------+---------
+# Scale to four replicas
+#---------+---------+---------+---------+---------
 
-# No podemos reescalar en este ejemplo, porque hay volúmenes montados. 
-# Por eso usamos pods en lugar de ReplicationController
+kubectl scale --replicas=4 -f wordpress.yaml
 
-# Ir a doc de vitess, buscar kubernetes en el indice
+#---------+---------+---------+---------+---------
+# Upgrade to new version
+#---------+---------+---------+---------+---------
 
-# Delete and re-create pods
-kubectl delete -f wordpress.yaml
-kubectl delete -f mysql.yaml
-kubectl create -f wordpress.yaml
-kubectl create -f mysql.yaml
+# modify wordpress.yaml and change 
+# version: 4.5 
+# replicas: 4
+watch kubectl get deployments
+kubectl apply -f wordpress.yaml
+kubectl rollout history deployment/wordpress
+kubectl rollout undo deployment/wordpress
+
+# Repeat a change, but this time pausing
+kubectl apply -f wordpress.yaml && kubectl rollout pause deployment/wordpress
+kubectl rollout resume deployment/wordpress
+
+# Open the kubernetes UI 
+gcloud container clusters describe icoloma-wppd | egrep '((username)|(password))'
+kubectl cluster-info | grep kubernetes-dashboard
+
+#---------+---------+---------+---------+---------
+# Cleanup
+#---------+---------+---------+---------+---------
 
 # Cleanup
-gcloud compute firewall-rules delete wppd-world-80
-kubectl delete service wpfrontend
-kubectl delete service mysql
-kubectl delete pod wordpress
-kubectl delete pod mysql
-gcloud container clusters delete wppd
-gcloud compute disks delete mysql-disk wordpress-disk
+# gcloud compute firewall-rules delete wppd-world-80
+# kubectl delete service wpfrontend
+# kubectl delete service mysql
+# kubectl delete pod wordpress
+# kubectl delete pod mysql
+gcloud container clusters delete icoloma-wppd
+gcloud compute disks delete mysql-disk 
+
+# Optional: Show the vitess config for kubernetes
+# http://vitess.io/overview/
