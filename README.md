@@ -6,3 +6,7 @@ For more information, follow:
 
 * [Cloud Codelabs](https://codelabs.developers.google.com)
 * [GKE Tutorials](https://cloud.google.com/container-engine/docs/tutorials)
+
+# Getting started
+
+(June 2016) The most up-to-date example today is the wordpress script, updated to use Deployments and k8s 1.3
