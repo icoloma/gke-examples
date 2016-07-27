@@ -1,4 +1,4 @@
-**This is not an official Google Project**
+This is not an official Google Project.
 
 This repository contains a list of demos with the corresponding script to follow. When possible, the original contents have been referenced. Expect a varied degree of up-to-dateness.
 
@@ -11,5 +11,5 @@ For more information, follow:
 
 # Folder contents
 
-* node: A really simple example to create a Docker container, upload to GCR and deploy on Kubernetes
-* wordpress: an example of using Deployments with Kubernetes 1.3
+* **node**: A really simple example to create a Docker container, upload to GCR and deploy on Kubernetes
+* **wordpress**: an example of using Deployments with Kubernetes 1.3
