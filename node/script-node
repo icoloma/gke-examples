@@ -1,9 +1,5 @@
-
-
-# Show click to deploy (App Launcher)
-
 # Configure project
-export PROJECT_ID=koliseo2
+export PROJECT_ID=<your-project-id>
 
 # Show contents of server.js and test on localhost:8080
 node server.js
@@ -35,9 +31,9 @@ kubectl expose rc hello-node --create-external-load-balancer=true
 
 kubectl get services
 
-# probar la IP pública con puerto 8080 en el navegador
+# test the public IP address with the browser
 
-# reescalar el númeor de replicas
+# scale the number of replicas
 kubectl scale rc hello-node --replicas=3
 
 kubectl get pods
