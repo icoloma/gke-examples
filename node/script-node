@@ -1,3 +1,11 @@
+#!/bin/bash
+# A bare-bones example to create a Docker container, upload to GCR and 
+# deploy on Kubernetes
+#
+# This tutorial is available at 
+# http://kubernetes.io/docs/hellonode/
+#
+
 # Configure project
 export PROJECT_ID=<your-project-id>
 

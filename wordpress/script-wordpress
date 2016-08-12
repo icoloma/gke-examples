@@ -1,8 +1,11 @@
 #!/bin/bash
+# A demo to show how Deployments work with Kubernetes 1.3
+#
 # This tutorial is available at 
 # https://cloud.google.com/container-engine/docs/tutorials/persistent-disk/
+#
 
-# Show Application Launcher, as an example of how to 
+# (optional) Show Application Launcher, as an example of how to 
 # create Wordpress using plain VMs
 
 #---------+---------+---------+---------+---------
