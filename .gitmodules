@@ -1,3 +1,0 @@
-[submodule "microservices/orchestrate-with-kubernetes"]
-	path = microservices/orchestrate-with-kubernetes
-	url = https://github.com/googlecodelabs/orchestrate-with-kubernetes.git

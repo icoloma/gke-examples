@@ -11,7 +11,8 @@
 # You will need to own a domain for this demo. Change this to your domain name.
 export DOMAIN=icoloma.supercloud.co
 
-# --- First time ---
+# --- First time: DNS stuff ---
+
 # The first time that you prepare for this lab, you should run these
 
 # Create a dns zone file
@@ -29,11 +30,22 @@ gcloud container clusters create icoloma-us --zone=us-east1-b --num-nodes=2
 
 gcloud container clusters list
 
-# TODO: do we need these? Set credentials in kubectl, but they are there already
-# gcloud container clusters get-credentials icoloma-eu --zone=europe-west1-d
-# gcloud container clusters get-credentials icoloma-us --zone=us-east1-b
-
 # Get the list of context names for Kubernetes
 for c in $(kubectl config view -o jsonpath='{.contexts[*].name}'); do echo $c; done
 
+# Create the cluster config files (to add to the Federation Control Plane) and
+# the kubeconfig files so that the Federation Control Plane can manipulate the clusters
+./create-cluster-config.sh
+cat clusters/*
+cat kubeconfigs/*
 
+# Choose one of your contexts and deploy the Federation Control Plane
+kubectl config use-context gke_glass-turbine-504_europe-west1-d_icoloma-eu
+kubectl create namespace federation
+
+# Wait until the EXTERNAL-IP is populated
+kubectl --namespace=federation get services 
+
+# Create a file named known-tokens.csv with one line that will be used for 
+# federation API secrets (replace the first field with a long, random token):
+# XXXXXXXXXXXXXXXXXXX,admin,admin

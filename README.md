@@ -11,4 +11,4 @@ For more information, follow:
 
 * **node**: A bare-bones example to create a Docker container, upload to GCR and deploy on Kubernetes
 * **wordpress**: A demo to show how [Deployments](http://kubernetes.io/docs/user-guide/deployments/) work with Kubernetes 1.3
-* **federated**: A demo of how to orchestrate multiple containers with [Federated Services](https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/federated-services.md)
+* **federation**: A demo of how to orchestrate multiple containers with [Federated Services](https://github.com/kubernetes/kubernetes/blob/release-1.3/docs/design/federated-services.md)

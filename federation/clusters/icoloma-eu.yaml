@@ -5,6 +5,6 @@ metadata:
 spec:
   serverAddressByClientCIDRs:
     - clientCIDR: "0.0.0.0/0"
-      serverAddress: "SERVER_ADDRESS"
+      serverAddress: "https://104.155.118.146"
   secretRef:
     name: icoloma-eu
