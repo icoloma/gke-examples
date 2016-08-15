@@ -13,8 +13,22 @@ set -e
 # You will need to own a domain for this demo. Change this to your domain name.
 export DOMAIN=icoloma.supercloud.co
 
-# Get the list of context names from Kubernetes
-alias show_contexts='for c in $(kubectl config view -o jsonpath='{.contexts[*].name}'); do echo $c; done'
+# --- DNS config ---
+# In which we register a domain name for our federated service, and bind
+# to a Cloud DNS zone file
+
+# The first time that you prepare for this lab, you should run these
+
+# Create a dns zone file
+gcloud dns managed-zones create icoloma-supercloud --dns-name $DOMAIN
+
+# Register your domain (here, icoloma.supercloud.co) using domains.google.com 
+# or any other, and when asked introduce these name servers:
+gcloud dns managed-zones describe icoloma-supercloud
+
+# --- Create the clusters ---
+# In which we create a cluster in EU and US, and configure a cluster definition 
+# file (in clusters/) and secret (in kubeconfigs)
 
 createCluster() {
   clusterName=$1
@@ -35,44 +49,26 @@ createCluster() {
   sed -i "s|SERVER_ADDRESS|${serverAddress}|g" ${clusterYamlFile}
 
   # Create kubeconfig
-  kubectl config view --flatten --minify > kubeconfigs/${clusterName}.yaml
+  mkdir -p kubeconfigs/${clusterName}/
+  kubectl config view --flatten --minify > kubeconfigs/${clusterName}/kubeconfig
 
 }
-
-# --- DNS config ---
-# In which we register a domain name for our federated service, and bind
-# to a Cloud DNS zone file
-
-# The first time that you prepare for this lab, you should run these
-
-# Create a dns zone file
-gcloud dns managed-zones create icoloma-supercloud --dns-name $DOMAIN
-
-# Register your domain (here, icoloma.supercloud.co) using domains.google.com 
-# or any other, and when asked introduce these name servers:
-gcloud dns managed-zones describe icoloma-supercloud
-
-# -- End of DNS Config ---
-
-# --- Create the clusters ---
-# In which we create a cluster in EU and US, and configure a cluster definition 
-# file (in clusters/) and secret (in kubeconfigs)
-
-# Current project
-# PROJECT=$(gcloud config list core/project 2> /dev/null | grep 'project =' | sed -r 's/project = (.*)/\1/')
-# echo "Current project is $PROJECT"
-
-# gcloud container clusters list
 
 # Create both clusters
 createCluster icoloma-eu europe-west1-b
 createCluster icoloma-us us-east1-b
 echo "All good. Check files in clusters/*.yaml and kubeconfigs/*.yaml"
+ls -R kubeconfigs/
 cat clusters/*
-cat kubeconfigs/*
 
-# Choose one of your contexts and deploy the Federation Control Plane
-federationContext=$(show_contexts | grep icoloma-eu)
+# --- Deploy the Federation API Server ---
+# In which we create a namespace for federation and, uhm, deploy the Federated API Server
+
+# Get the list of context names from Kubernetes
+alias show_contexts='for c in $(kubectl config view -o jsonpath='{.contexts[*].name}'); do echo $c; done'
+
+export federationContext=$(show_contexts | grep icoloma-eu)
+echo "Federation context: ${federationContext}"
 kubectl config use-context ${federationContext}
 kubectl create namespace federation
 kubectl create -f services/federation-service.yaml
@@ -99,16 +95,18 @@ kubectl create -f deployments/federation-apiserver.yaml
 kubectl --namespace=federation get deployments
 kubectl --namespace=federation get pods
 
+# --- Deploy the Federated Controller Manager ---
+
 # Create kubeconfig for the federation server
 kubectl config set-cluster federation-cluster --server=https://${advertiseAddress} --insecure-skip-tls-verify=true
 kubectl config set-credentials federation-cluster --token="$(cut -f 1 -d , known-tokens.csv)"
 kubectl config set-context federation-cluster --cluster=federation-cluster --user=federation-cluster
 kubectl config use-context federation-cluster
-kubectl config view --flatten --minify > kubeconfigs/federation.yaml
+kubectl config view --flatten --minify > kubeconfigs/federation/kubeconfig
 
 # create secret to access federation service
-kubectl config use-context gke_glass-turbine-504_europe-west1-d_icoloma-eu
-kubectl create secret generic federation-apiserver-secret --namespace=federation --from-file=kubeconfigs/federation.yaml
+kubectl config use-context ${federationContext}
+kubectl create secret generic federation-apiserver-secret --namespace=federation --from-file=kubeconfigs/federation/kubeconfig
 
 # Verify
 kubectl --namespace=federation describe secrets federation-apiserver-secret
@@ -116,3 +114,15 @@ kubectl --namespace=federation describe secrets federation-apiserver-secret
 # Deploy the Federated Controller Manager
 kubectl create -f deployments/federation-controller-manager.yaml
 kubectl --namespace=federation get pods
+
+# --- Register clusters with Federated API server ---
+# We register both clusters with the API Server
+
+kubectl --namespace=federation create secret generic icoloma-eu --from-file=kubeconfigs/icoloma-eu/kubeconfig
+kubectl --context=federation-cluster create -f clusters/icoloma-eu.yaml
+
+kubectl --namespace=federation create secret generic icoloma-us --from-file=kubeconfigs/icoloma-us/kubeconfig
+kubectl --context=federation-cluster create -f clusters/icoloma-us.yaml
+
+# Verify
+kubectl --context=federation-cluster get clusters
