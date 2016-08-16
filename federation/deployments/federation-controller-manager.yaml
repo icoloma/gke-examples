@@ -19,14 +19,14 @@ spec:
           path: /etc/ssl
       containers:
       - name: controller-manager
-        image: gcr.io/google_containers/hyperkube-amd64:v1.3.4
+        image: gcr.io/google_containers/hyperkube-amd64:v1.3.6-beta.0
         args:
           - /hyperkube
           - federation-controller-manager
           - --master=https://federation-apiserver:443
           - --dns-provider=google-clouddns
           - --federation-name=federation
-          - --zone-name=federation.com.
+          - --zone-name=icoloma.supercloud.co.
           - --v=2
         volumeMounts:
         - name: ssl

@@ -14,8 +14,10 @@ spec:
         module: federation-apiserver
     spec:
       containers:
+      # Want to upgrade?
+      # gcloud alpha container images list-tags gcr.io/google_containers/hyperkube-amd64
       - name: apiserver
-        image: gcr.io/google_containers/hyperkube-amd64:v1.3.4
+        image: gcr.io/google_containers/hyperkube-amd64:v1.3.6-beta.0
         command:
           - /hyperkube
           - federation-apiserver

@@ -62,7 +62,7 @@ ls -R kubeconfigs/
 cat clusters/*
 
 # --- Deploy the Federation API Server ---
-# In which we create a namespace for federation and, uhm, deploy the Federated API Server
+# In which we create a namespace for federation and deploy the Federated API Server
 
 # Get the list of context names from Kubernetes
 alias show_contexts='for c in $(kubectl config view -o jsonpath='{.contexts[*].name}'); do echo $c; done'
@@ -96,6 +96,7 @@ kubectl --namespace=federation get deployments
 kubectl --namespace=federation get pods
 
 # --- Deploy the Federated Controller Manager ---
+# Yep. Just do that.
 
 # Create kubeconfig for the federation server
 kubectl config set-cluster federation-cluster --server=https://${advertiseAddress} --insecure-skip-tls-verify=true
@@ -126,3 +127,5 @@ kubectl --context=federation-cluster create -f clusters/icoloma-us.yaml
 
 # Verify
 kubectl --context=federation-cluster get clusters
+
+# AWESOME STUFF STARTS HERE. Go to script-federated.sh.
