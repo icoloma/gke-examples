@@ -30,3 +30,11 @@ done
 kubectl --context=gke_glass-turbine-504_us-east1-b_icoloma-us create -f deployments/nginx.yaml 
 kubectl --context=gke_glass-turbine-504_us-east1-b_icoloma-us create -f deployments/nginx.yaml 
 
+
+
+
+
+
+# Cleanup
+gcloud container clusters delete icoloma-eu --zone europe-west1-b
+gcloud container clusters delete icoloma-us --zone us-east1-b
