@@ -26,10 +26,6 @@ gcloud dns managed-zones create icoloma-supercloud --dns-name $DOMAIN
 # or any other, and when asked introduce these name servers:
 gcloud dns managed-zones describe icoloma-supercloud
 
-# Create a federation cluster with permission to modify DNS records
-#gcloud container clusters create federation-cluster --zone=europe-west1-b --num-nodes=1 \
-#  --scopes "storage-ro,logging-write,monitoring-write,service-control,service-management,https://www.googleapis.com/auth/ndev.clouddns.readwrite"
-
 # --- Create the clusters ---
 # In which we create a cluster in EU and US, and configure a cluster definition 
 # file (in clusters/) and secret (in kubeconfigs)
@@ -38,8 +34,9 @@ createCluster() {
   clusterName=$1
   zone=$2
 
+  # Federation cluster will need permission to modify DNS records
   gcloud container clusters create ${clusterName} --zone=${zone} --num-nodes=2 \
-    --scopes "storage-ro,logging-write,monitoring-write,service-control,service-management,https://www.googleapis.com/auth/ndev.clouddns.readwrite"
+  --scopes "storage-ro,logging-write,monitoring-write,service-control,service-management,https://www.googleapis.com/auth/ndev.clouddns.readwrite"
 
   # Context for EU cluster
   context=$(kubectl config view -o jsonpath='{.contexts[*].name}' | grep -o "[^ ]*${clusterName}")
@@ -74,9 +71,9 @@ alias show_contexts='for c in $(kubectl config view -o jsonpath='{.contexts[*].n
 
 export federationContext=$(show_contexts | grep icoloma-eu)
 echo "Federation context: ${federationContext}"
-kubectl config use-context ${federationContext}
+kubectl config use-context "${federationContext}"
 kubectl create namespace federation
-kubectl create -f services/federation-service.yaml
+kubectl create -f services/federation-apiserver.yaml
 
 # Wait until the EXTERNAL-IP is populated
 kubectl --namespace=federation get services 
@@ -90,7 +87,7 @@ kubectl --namespace=federation create secret generic federation-apiserver-secret
 kubectl --namespace=federation describe secrets federation-apiserver-secrets
 
 # Get the Federated API Server IP and create the actual Deployment
-export advertiseAddress=$(kubectl --namespace=federation get services federation-apiserver -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+advertiseAddress=$(kubectl --namespace=federation get services federation-apiserver -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 echo "Federated API address: ${advertiseAddress}"
 
 sed -i "s|ADVERTISE_ADDRESS|${advertiseAddress}|g" deployments/federation-apiserver.yaml
@@ -111,8 +108,9 @@ kubectl config use-context federation-cluster
 kubectl config view --flatten --minify > kubeconfigs/federation/kubeconfig
 
 # create secret to access federation service
-kubectl config use-context ${federationContext}
+kubectl config use-context federation-cluster
 kubectl create secret generic federation-apiserver-secret --namespace=federation --from-file=kubeconfigs/federation/kubeconfig
+kubectl config use-context ${federationContext}
 
 # Verify
 kubectl --namespace=federation describe secrets federation-apiserver-secret
@@ -121,16 +119,31 @@ kubectl --namespace=federation describe secrets federation-apiserver-secret
 kubectl create -f deployments/federation-controller-manager.yaml
 kubectl --namespace=federation get pods
 
+# Leave this open while creating clusters and deploying services
+# Show the logs of one of the pieces
+# invoke: logs 
+logs() {
+  kubectl logs -f --namespace=federation `kubectl --namespace federation get pods | grep $1 | cut -f 1 -d ' '` $2 $3
+}
+logs controller-manager
+logs api -c apiserver
+
 # --- Register clusters with Federated API server ---
 # We register both clusters with the API Server
 
 kubectl --namespace=federation create secret generic icoloma-eu --from-file=kubeconfigs/icoloma-eu/kubeconfig
-kubectl --context=federation-cluster create -f clusters/icoloma-eu.yaml
-
 kubectl --namespace=federation create secret generic icoloma-us --from-file=kubeconfigs/icoloma-us/kubeconfig
+
+kubectl --context=federation-cluster create -f clusters/icoloma-eu.yaml
 kubectl --context=federation-cluster create -f clusters/icoloma-us.yaml
 
 # Verify
 kubectl --context=federation-cluster get clusters
 
+#
 # AWESOME STUFF STARTS HERE. Go to script-federated.sh.
+#
+
+# Cleanup
+gcloud container clusters delete icoloma-eu --zone europe-west1-b
+gcloud container clusters delete icoloma-us --zone us-east1-b

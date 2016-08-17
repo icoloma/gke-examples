@@ -24,6 +24,9 @@ for i in $(show_contexts | grep icoloma); do
   echo -e
 done
 
+# At any point, to debug the federated controller manager or api server
+kubectl logs -f --namespace=federation `kubectl --namespace federation get pods | grep controller-manager | cut -f 1 -d ' '`
+kubectl logs -f --namespace=federation `kubectl --namespace federation get pods | grep api | cut -f 1 -d ' '` -c apiserver
 
 # Create the Deployments
 
@@ -34,7 +37,3 @@ kubectl --context=gke_glass-turbine-504_us-east1-b_icoloma-us create -f deployme
 
 
 
-
-# Cleanup
-gcloud container clusters delete icoloma-eu --zone europe-west1-b
-gcloud container clusters delete icoloma-us --zone us-east1-b
