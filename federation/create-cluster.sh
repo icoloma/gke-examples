@@ -26,6 +26,10 @@ gcloud dns managed-zones create icoloma-supercloud --dns-name $DOMAIN
 # or any other, and when asked introduce these name servers:
 gcloud dns managed-zones describe icoloma-supercloud
 
+# Create a federation cluster with permission to modify DNS records
+#gcloud container clusters create federation-cluster --zone=europe-west1-b --num-nodes=1 \
+#  --scopes "storage-ro,logging-write,monitoring-write,service-control,service-management,https://www.googleapis.com/auth/ndev.clouddns.readwrite"
+
 # --- Create the clusters ---
 # In which we create a cluster in EU and US, and configure a cluster definition 
 # file (in clusters/) and secret (in kubeconfigs)
@@ -34,7 +38,8 @@ createCluster() {
   clusterName=$1
   zone=$2
 
-  gcloud container clusters create ${clusterName} --zone=${zone} --num-nodes=3
+  gcloud container clusters create ${clusterName} --zone=${zone} --num-nodes=2 \
+    --scopes "storage-ro,logging-write,monitoring-write,service-control,service-management,https://www.googleapis.com/auth/ndev.clouddns.readwrite"
 
   # Context for EU cluster
   context=$(kubectl config view -o jsonpath='{.contexts[*].name}' | grep -o "[^ ]*${clusterName}")
