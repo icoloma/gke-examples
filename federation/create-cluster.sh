@@ -37,6 +37,7 @@ createCluster() {
   # Federation cluster will need permission to modify DNS records
   gcloud container clusters create ${clusterName} --zone=${zone} --num-nodes=2 \
   --scopes "storage-ro,logging-write,monitoring-write,service-control,service-management,https://www.googleapis.com/auth/ndev.clouddns.readwrite"
+  gcloud container clusters get-credentials ${clusterName} --zone=${zone}
 
   # Context for EU cluster
   context=$(kubectl config view -o jsonpath='{.contexts[*].name}' | grep -o "[^ ]*${clusterName}")
@@ -50,7 +51,7 @@ createCluster() {
   echo "Cluster IP is ${serverAddress}"
   sed -i "s|SERVER_ADDRESS|${serverAddress}|g" ${clusterYamlFile}
 
-  # Create kubeconfig
+  # Create kubeconfig (review that config is not null)
   mkdir -p kubeconfigs/${clusterName}/
   kubectl config view --flatten --minify > kubeconfigs/${clusterName}/kubeconfig
 
@@ -60,7 +61,7 @@ createCluster() {
 createCluster icoloma-eu europe-west1-b
 createCluster icoloma-us us-east1-b
 echo "All good. Check files in clusters/*.yaml and kubeconfigs/*.yaml"
-ls -R kubeconfigs/
+ls -lR kubeconfigs/*/kubeconfig
 cat clusters/*
 
 # --- Deploy the Federation API Server ---
@@ -104,13 +105,13 @@ kubectl --namespace=federation get pods
 kubectl config set-cluster federation-cluster --server=https://${advertiseAddress} --insecure-skip-tls-verify=true
 kubectl config set-credentials federation-cluster --token="$(cut -f 1 -d , known-tokens.csv)"
 kubectl config set-context federation-cluster --cluster=federation-cluster --user=federation-cluster
+
 kubectl config use-context federation-cluster
 kubectl config view --flatten --minify > kubeconfigs/federation/kubeconfig
+kubectl config use-context ${federationContext}
 
 # create secret to access federation service
-kubectl config use-context federation-cluster
 kubectl create secret generic federation-apiserver-secret --namespace=federation --from-file=kubeconfigs/federation/kubeconfig
-kubectl config use-context ${federationContext}
 
 # Verify
 kubectl --namespace=federation describe secrets federation-apiserver-secret
@@ -144,6 +145,3 @@ kubectl --context=federation-cluster get clusters
 # AWESOME STUFF STARTS HERE. Go to script-federated.sh.
 #
 
-# Cleanup
-gcloud container clusters delete icoloma-eu --zone europe-west1-b
-gcloud container clusters delete icoloma-us --zone us-east1-b
