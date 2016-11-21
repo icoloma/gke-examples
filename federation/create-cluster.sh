@@ -1,16 +1,17 @@
 #!/bin/bash
 # Create the federated cluster config, with two clusters (EU and US) and
-# a federated-api service living in one of the clusters in Europe
-# You would do this before the demo, since it's a long manual process.
+# a federated-api service living in the European cluster
+# You should do this in advance before the demo, since it's a long manual process.
 
-# Usage: not as simple as ./create-cluster-config. You may probably want to run things manually. 
+# Usage: not as simple as ./create-cluster.sh. You may probably want 
+# to run each step manually. 
 # Output:
 # _output/output/clusters/icoloma-[eu,us] Cluster definition file
 # _output/kubeconfigs/icoloma[eu,us] Credentials to connect to the cluster
 #
 # All federation services are created under namespace federation
 #
-# Full set of instructions available at 
+# Doc available at 
 # http://kubernetes.io/docs/admin/federation/
 
 set -e
@@ -31,10 +32,16 @@ gcloud dns managed-zones create icoloma-supercloud --dns-name $DOMAIN
 # or any other, and when asked introduce these name servers:
 gcloud dns managed-zones describe icoloma-supercloud
 
+# Enable legacy certificate auth for kubectl, otherwise the auth section in kubeconfig is empty
+# see https://github.com/kubernetes/kubernetes/issues/30617
+# see https://cloud.google.com/container-engine/docs/iam-integration#authentication_modes
+gcloud config set container/use_client_certificate True
+export CLOUDSDK_CONTAINER_USE_CLIENT_CERTIFICATE=True
+
 # --- Create the clusters ---
 # In which we create a cluster in EU and US, and configure a cluster definition 
 # file (in clusters/) and secret (in kubeconfigs)
-mkdir -p _output/clusters _output/federation _output/deployments 
+mkdir -p _output/clusters _output/federation _output/deployments _output/kubeconfigs/federation-apiserver
 
 createCluster() {
   clusterName=$1
@@ -80,6 +87,10 @@ echo "All good. Check files in clusters/*.yaml and kubeconfigs/*.yaml"
 ls -lR kubeconfigs/*/kubeconfig
 cat clusters/*
 
+# Things typically break here, and it's usually because of 
+# lack of credentials. 
+grep 'config: null' _output/kubeconfigs/icoloma-eu/kubeconfig && echo 'ERROR: kubeconfig was not generated correctly'
+
 # --- Deploy the Federation API Server ---
 # In which we create a namespace for federation and deploy the Federated API Server
 
@@ -93,8 +104,11 @@ kubectl --context="${federationContext}" \
   create -f ns/federation.yaml
 
 # Create API Server and wait until the EXTERNAL-IP is populated
-kubectl create -f services/federation-apiserver.yamlTODO REVIEW CONTENTS
-watch kubectl --namespace=federation get services 
+kubectl --context="${federationContext}" \
+  create -f services/federation-apiserver.yaml
+watch kubectl --context="${federationContext}" \
+  --namespace=federation \
+  get services 
 
 # Create a file named known-tokens.csv with one line that will be used for 
 # federation API secrets (replace the first field with a long, random token):
@@ -113,8 +127,6 @@ kubectl --context=${federationContext} \
 kubectl --context=${federationContext} \
   --namespace=federation \
   create -f pvc/federation-apiserver-etcd.yaml
-
-# Verify
 kubectl --context=${federationContext} \
   --namespace=federation \
   get pvc
@@ -140,9 +152,6 @@ watch kubectl  --context=${federationContext} \
   get deployments
 
 # --- Deploy the Federated Controller Manager ---
-# Things typically break here, and it's usually because of 
-# lack of credentials. DOUBLE CHECK YOUR CREDENTIALS 
-# in kubeconfig
 
 # Create kubeconfig for the federation server
 kubectl config set-cluster federation-cluster \
@@ -154,7 +163,6 @@ kubectl config set-context federation-cluster \
   --cluster=federation-cluster \
   --user=federation-cluster
 
-mkdir -p _output/kubeconfigs/federation-apiserver
 kubectl config use-context federation-cluster
 kubectl config view --flatten --minify > _output/kubeconfigs/federation-apiserver/kubeconfig
 kubectl config use-context ${federationContext}
