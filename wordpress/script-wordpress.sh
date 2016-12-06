@@ -82,8 +82,10 @@ kubectl apply -f wordpress.yaml && kubectl rollout pause deployment/wordpress
 kubectl rollout resume deployment/wordpress
 
 # Open the kubernetes UI 
-gcloud container clusters describe icoloma-wppd | egrep '((username)|(password))'
-kubectl cluster-info | grep kubernetes-dashboard
+../dashboard.sh icoloma-wppd
+
+#gcloud container clusters describe icoloma-wppd | egrep '((username)|(password))'
+#kubectl cluster-info | grep kubernetes-dashboard
 
 #---------+---------+---------+---------+---------
 # Cleanup
