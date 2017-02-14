@@ -53,6 +53,8 @@ createCluster() {
   gcloud container clusters get-credentials ${clusterName} --zone=${zone}
 
   # Context for EU cluster
+  # TODO: rewrite using "kubectl config get-contexts"
+  # TODO: rename entry in ~/.kube/config to something more manageable
   context=$(kubectl config view -o jsonpath='{.contexts[*].name}' | grep -o "[^ ]*${clusterName}")
   echo "Configuring $clusterName => ${context}"
 
