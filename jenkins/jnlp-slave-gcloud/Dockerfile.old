@@ -1,0 +1,19 @@
+# Extends the default jnlp-slave image to add gcloud 
+FROM jenkinsci/jnlp-slave
+
+USER root
+RUN apt-get update && apt-get install -y -qq --no-install-recommends wget curl unzip python python-openssl docker.io
+RUN usermod -aG docker jenkins
+
+USER jenkins
+ENV CLOUDSDK_PYTHON_SITEPACKAGES=1
+
+# put your own components here
+RUN curl https://sdk.cloud.google.com | bash -s -- --disable-prompts 
+# RUN google-cloud-sdk/install.sh --usage-reporting=true --path-update=true --bash-completion=true --rc-path=/.bashrc --additional-components app-engine-java app-engine-python app kubectl alpha beta
+
+RUN google-cloud-sdk/bin/gcloud config set --installation component_manager/disable_update_check true
+# RUN sed -i -- 's/\"disable_updater\": false/\"disable_updater\": true/g' /google-cloud-sdk/lib/googlecloudsdk/core/config.json
+
+RUN google-cloud-sdk/bin/gcloud config set disable_usage_reporting true
+
