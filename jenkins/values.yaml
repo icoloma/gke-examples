@@ -60,6 +60,11 @@ Agent:
   ImageTag: latest
   Cpu: "200m"
   Memory: "256Mi"
+  AlwaysPullImage: true
+  volumes:
+  - type: Secret
+    secretName: jenkins-demo-secrets
+    mountPath: /var/run/secrets/jenkins-demo-secrets
 
 Persistence:
   Enabled: true
