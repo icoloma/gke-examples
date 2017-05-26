@@ -15,7 +15,7 @@ Master:
 # Memory: "256Mi"
 # Set min/max heap here if needed with:
 # JavaOpts: "-Xms512m -Xmx512m"
-  ServicePort: 8777
+  ServicePort: 80
 # For minikube, set this to NodePort, elsewhere use LoadBalancer
 # Use ClusterIP if your setup includes ingress controller
   ServiceType: LoadBalancer
@@ -60,6 +60,11 @@ Agent:
   ImageTag: latest
   Cpu: "200m"
   Memory: "256Mi"
+  AlwaysPullImage: true
+  volumes:
+  - type: Secret
+    secretName: jenkins-demo-secrets
+    mountPath: /var/run/secrets/jenkins-demo-secrets
 
 Persistence:
   Enabled: true

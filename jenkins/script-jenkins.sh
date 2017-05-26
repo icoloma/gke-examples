@@ -44,15 +44,4 @@ Create multibranch or single branch pipeline.
 Add branch source, use https://github.com/icoloma/node-demo-app.git
 Show Jenkinsfile
 
-<!--
-TODO: 
-Do we need to put number of executor in the master config greater than 0? (e.g. 3)
-
-# create TLS certificate and key
-openssl req -x509 -newkey rsa:2048 -keyout cert/key.pem -out cert/cert.pem -days 3000 -nodes
-
-# create TLS secret
-kubectl create secret tls jenkins.cluster.local --cert=cert/cert.pem --keys=cert/key.pem
-
--->
 
