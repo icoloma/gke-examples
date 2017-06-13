@@ -1,2 +1,4 @@
 federation/_output/
 *.tgz
+stable
+
