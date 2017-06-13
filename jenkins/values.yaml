@@ -5,7 +5,7 @@
 Master:
 # Name: jenkins-master
 # Image: "jenkinsci/jenkins"
-# ImageTag: "2.46.1"
+  ImageTag: "2.64"
 # ImagePullPolicy: "Always"
 # Component: "jenkins-master"
 # UseSecurity: true
@@ -32,8 +32,6 @@ Master:
       - workflow-aggregator:2.5
       - credentials-binding:1.11
       - git:3.2.0
-      # the new Jenkins L&F, to be pretty on the outside too
-      - blueocean:1.0.1
 # Used to approve a list of groovy functions in pipelines used the script-security plugin. Can be viewed under /scriptApproval
   # ScriptApproval:
   #   - "method groovy.json.JsonSlurperClassic parseText java.lang.String"
