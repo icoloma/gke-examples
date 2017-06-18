@@ -61,5 +61,5 @@ In the node-demo-app/ folder:
 * Make a change, and run:
 
 ``` bash
-git commit -m 'Change' && git push && git tag v1.0 --force && git push --tags --force
+git commit -am 'Change' && git push && git tag v1.0 --force && git push --tags --force
 ```
