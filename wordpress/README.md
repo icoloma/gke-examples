@@ -75,11 +75,10 @@ kubectl rollout undo deployment/wordpress
 kubectl apply -f wordpress.yaml && kubectl rollout pause deployment/wordpress
 kubectl rollout resume deployment/wordpress
 
-# Open the kubernetes UI 
-../dashboard.sh icoloma-wppd
-
-#gcloud container clusters describe icoloma-wppd | egrep '((username)|(password))'
-#kubectl cluster-info | grep kubernetes-dashboard
+# Open the web console of Google Cloud (console.google.com) and compare with the Kubernetes Dashboard 
+kubectl proxy
+xdg-open http://localhost:8001/ui
+xdg-open https://console.cloud.google.com/kubernetes/list
 ```
 
 Cleanup
