@@ -1,17 +1,11 @@
-#!/bin/bash
-# A demo to show how Deployments work with Kubernetes 1.3
-#
-# This tutorial is available at 
-# https://cloud.google.com/container-engine/docs/tutorials/persistent-disk/
-#
+# A demo to show how Deployments work with Kubernetes
 
-# (optional) Show Application Launcher, as an example of how to 
-# create Wordpress using plain VMs
+The full tutorial is available at 
+https://cloud.google.com/container-engine/docs/tutorials/persistent-disk/
 
-#---------+---------+---------+---------+---------
-# Create and connect to cluster
-#---------+---------+---------+---------+---------
+Create and connect to the cluster
 
+```sh
 # Create cluster 
 gcloud container clusters create icoloma-wppd --num-nodes 2
 
@@ -23,11 +17,11 @@ gcloud container clusters list
 
 # Create persistent disk
 gcloud compute disks create --size 200GB mysql-disk
+```
 
-#---------+---------+---------+---------+---------
-# Configure pods and services
-#---------+---------+---------+---------+---------
+Configure pods and services
 
+```sh
 # Create the MySQL pod and wait for it to appear
 watch kubectl get pods
 kubectl create -f mysql.yaml
@@ -58,17 +52,17 @@ kubectl logs <wordpress-pod-id>
 
 # Delete a pod and see it re-created
 kubectl delete pod <pod-id>
+```
 
-#---------+---------+---------+---------+---------
-# Scale to four replicas
-#---------+---------+---------+---------+---------
+Scale to four replicas
 
+```sh
 kubectl scale --replicas=4 -f wordpress.yaml
+```
 
-#---------+---------+---------+---------+---------
-# Upgrade to new version
-#---------+---------+---------+---------+---------
+Upgrade to new version
 
+```sh
 # modify wordpress.yaml and change 
 # version: 4.5 
 # replicas: 4
@@ -86,11 +80,11 @@ kubectl rollout resume deployment/wordpress
 
 #gcloud container clusters describe icoloma-wppd | egrep '((username)|(password))'
 #kubectl cluster-info | grep kubernetes-dashboard
+```
 
-#---------+---------+---------+---------+---------
-# Cleanup
-#---------+---------+---------+---------+---------
+Cleanup
 
+```sh
 # Cleanup
 # gcloud compute firewall-rules delete wppd-world-80
 # kubectl delete service wpfrontend
@@ -100,5 +94,6 @@ kubectl rollout resume deployment/wordpress
 gcloud container clusters delete icoloma-wppd
 gcloud compute disks delete mysql-disk 
 
-# Optional: Show the vitess config for kubernetes
+# Optional: Review the vitess config for kubernetes
 # http://vitess.io/overview/
+```
