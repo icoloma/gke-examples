@@ -3,7 +3,22 @@
 The full tutorial is available at 
 https://cloud.google.com/container-engine/docs/tutorials/persistent-disk/
 
-Create and connect to the cluster
+If this is your first time working with Google Cloud, take a second to open [the web console for Container Engine](https://console.cloud.google.com/kubernetes) and confirm that the GKE API is enabled. You may have to enable Billing by introducing a credit card. This is just to control abusing the platform, you will have $300 to spend in 12 months and will receive an e-mail before your card is ever charged.  
+
+If you don't have a default project and zone, configure one now. In this context, `my-project-id` is the id of the project as it appears in the URL in your browser.
+
+```sh
+# set a default project
+gcloud config set project <my-project-id>
+
+# get the list of zones
+gcloud compute zones list
+
+# set a default zone for the labs (any zone will do)
+gcloud config set compute/zone europe-west1-b
+```
+
+Create the cluster. This is the platform that will receive all commands from `kubectl`:
 
 ```sh
 # Create cluster 
@@ -26,7 +41,8 @@ Configure pods and services
 watch kubectl get pods
 kubectl create -f mysql.yaml
 
-# redirect mysql port to the local machine
+# optional: redirect local mysql port to the pod, bypassing firewall rules
+sudo apt-get install mysql-client
 kubectl port-forward mysql 3306
 mysql --host=localhost --user=root --protocol=tcp --password=popotitos42 wordpress
 SHOW TABLES
@@ -49,6 +65,9 @@ kubectl get service wpfrontend
 
 # See logs 
 kubectl logs <wordpress-pod-id>
+
+# run a shell in the pod
+kubectl exec -it <wordpress-pod-id> /bin/sh
 
 # Delete a pod and see it re-created
 kubectl delete pod <pod-id>
