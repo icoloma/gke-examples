@@ -94,6 +94,9 @@ kubectl rollout undo deployment/wordpress
 kubectl apply -f wordpress.yaml && kubectl rollout pause deployment/wordpress
 kubectl rollout resume deployment/wordpress
 
+# Check out the audit log for change sin the cluster
+gcloud container operations list
+
 # Open the web console of Google Cloud (console.google.com) and compare with the Kubernetes Dashboard 
 kubectl proxy
 xdg-open http://localhost:8001/ui
