@@ -5,7 +5,7 @@
 Master:
 # Name: jenkins-master
 # Image: "jenkinsci/jenkins"
-  ImageTag: "2.64"
+# ImageTag: "lts"
 # ImagePullPolicy: "Always"
 # Component: "jenkins-master"
 # UseSecurity: true
@@ -27,17 +27,18 @@ Master:
 # LoadBalancerSourceRanges:
 # - 0.0.0.0/0
 # List of plugins to be install during Jenkins master start
-  InstallPlugins:
-      - kubernetes:0.11 
-      - workflow-aggregator:2.5
-      - credentials-binding:1.11
-      - git:3.2.0
+# InstallPlugins:
+#   - kubernetes:1.1
+#   - workflow-aggregator:2.5
+#   - workflow-job:2.15
+#   - credentials-binding:1.13
+#   - git:3.6.4
 # Used to approve a list of groovy functions in pipelines used the script-security plugin. Can be viewed under /scriptApproval
   # ScriptApproval:
   #   - "method groovy.json.JsonSlurperClassic parseText java.lang.String"
   #   - "new groovy.json.JsonSlurperClassic"
 # List of groovy init scripts to be executed during Jenkins master start
-  InitScripts:
+# InitScripts:
 #  - |
 #    print 'adding global pipeline libraries, register properties, bootstrap jobs...'
 #  CustomConfigMap: false
@@ -64,8 +65,8 @@ Agent:
     secretName: jenkins-demo-secrets
     mountPath: /var/run/secrets/jenkins-demo-secrets
 
-Persistence:
-  Enabled: true
+#Persistence:
+#  Enabled: true
   ## A manually managed Persistent Volume and Claim
   ## Requires Persistence.Enabled: true
   ## If defined, PVC must be created manually before volume will be bound
@@ -75,12 +76,12 @@ Persistence:
   ## Default: volume.alpha.kubernetes.io/storage-class: default
   ##
   # StorageClass:
-  AccessMode: ReadWriteOnce
-  Size: 100Gi
-  volumes:
+#  AccessMode: ReadWriteOnce
+#  Size: 100Gi
+#  volumes:
 #  - name: nothing
 #    emptyDir: {}
-  mounts:
+#  mounts:
 #  - mountPath: /var/nothing
 #    name: nothing
 #    readOnly: true
