@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
         # documentation for this image: https://hub.docker.com/_/wordpress/
-        - image: wordpress:4
+        - image: wordpress:4.9-apache
           name: wordpress
           env:
             - name: WORDPRESS_DB_PASSWORD
