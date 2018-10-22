@@ -39,7 +39,7 @@ Configure pods and services
 ```sh
 # Create the MySQL pod and wait for it to appear
 watch kubectl get pods
-kubectl create -f mysql.yaml
+kubectl apply -f mysql.yaml
 
 # optional: redirect local mysql port to the pod, bypassing firewall rules
 sudo apt-get install mysql-client
@@ -50,15 +50,15 @@ CREATE TABLE foo (id INTEGER);
 SHOW TABLES
 
 # Create the MyQL service and wait for it
-kubectl create -f mysql-service.yaml
+kubectl apply -f mysql-service.yaml
 kubectl describe service mysql
 
 # Create the Wordpress Deployment
-kubectl create -f wordpress.yaml
+kubectl apply -f wordpress.yaml
 
 # Create the service. Note the type: LoadBalancer setting, 
 # which will create an external load balancer
-kubectl create -f wordpress-service.yaml
+kubectl apply -f wordpress-service.yaml
 kubectl get service wpfrontend
 
 # Wait for the public IP to appear and connect with browser (port 80)

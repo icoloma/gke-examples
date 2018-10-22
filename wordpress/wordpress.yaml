@@ -11,7 +11,8 @@ spec:
     spec:
       containers:
         # documentation for this image: https://hub.docker.com/_/wordpress/
-        - image: wordpress:4.9-apache
+        # TODO: upgrade to php7.1
+        - image: wordpress:php5.6
           name: wordpress
           env:
             - name: WORDPRESS_DB_PASSWORD
